@@ -9,4 +9,6 @@ rotas.post('/contas', controladorBanco.criarConta)
 
 rotas.put('/contas/:numeroConta', controladorBanco.atualizarDadosUsuario)
 
+rotas.delete('/contas/:numeroConta', controladorBanco.excluirConta)
+
 module.exports = rotas
