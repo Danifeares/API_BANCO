@@ -1,4 +1,4 @@
-let { contas, idConta, depositos, saques } = require('../bancodedados')
+let { contas, idConta, depositos, saques, transferencias } = require('../bancodedados')
 const {format} = require('date-fns')
 
 const listarContas = (req, res) => {
@@ -138,7 +138,7 @@ const depositar = (req, res) => {
 
     return res.status(204).json()
 
-  } catch (error) {
+  } catch (erro) {
     return res.status(500).json({ mensagem: 'erro inesperado' })
   }
 }
@@ -174,12 +174,51 @@ const sacar = (req, res) => {
 
     return res.status(204).json()
 
-  } catch (error) {
+  } catch (erro) {
     return res.status(500).json({ mensagem: 'erro inesperado' })
   }
 }
 
+const transferir = (req, res) => {
+  const {numero_conta_origem, numero_conta_destino, valor, senha} = req.body
+  try {
+    if (!numero_conta_origem || !numero_conta_destino || !valor || !senha) {
+      return res.status(404).json({
+        mensagem: "Os números das contas, o valor da transferência e a senha do banco de origem são obrigatórios!"
+      })
+    }
+    const contaDeOrigemEncontrada = contas.find((conta) => {
+      return conta.numero === Number(numero_conta_origem)
+    })
+    const contaDeDestinoEncontrada = contas.find((conta) => {
+      return conta.numero === Number(numero_conta_destino)
+    })
+    if (!contaDeOrigemEncontrada || !contaDeDestinoEncontrada) {
+      return res.status(400).json({ mensagem: 'Não foi possível encontrar conta(s) com o(s) número(s) informado(s).' })
+    }
+    if (senha !== contaDeOrigemEncontrada.usuario.senha) {
+      return res.status(401).json({ mensagem: 'A senha informada é inválida.' })
+    }
+    if (Number(valor) > contaDeOrigemEncontrada.saldo) {
+      return res.status(400).json({ mensagem: 'Saldo indisponível para saque.' })
+    }
 
+    contaDeOrigemEncontrada.saldo -= Number(valor)
+    contaDeDestinoEncontrada.saldo += Number(valor)
+
+    transferencias.push({
+      data: format(new Date(), "yyyy'-'MM'-'dd HH':'mm':'ss"),
+      numero_conta_origem,
+      numero_conta_destino,
+      valor
+    })
+
+    return res.status(204).json()
+    
+  } catch (erro) {
+    return res.status(500).json({ mensagem: 'erro inesperado' })
+  }
+}
 
 module.exports = {
   listarContas,
@@ -187,5 +226,6 @@ module.exports = {
   atualizarDadosUsuario,
   excluirConta,
   depositar,
-  sacar
+  sacar,
+  transferir
 }
