@@ -1,4 +1,4 @@
-let { contas, idConta } = require('../bancodedados')
+let { contas, idConta, depositos } = require('../bancodedados')
 
 const listarContas = (req, res) => {
   res.status(200).json(contas)
@@ -17,7 +17,7 @@ const criarConta = (req, res) => {
 
     if (contaJaExiste) {
       return res.status(404).json({
-        "mensagem": "Já existe uma conta com o cpf ou e-mail informado!"
+        mensagem: "Já existe uma conta com o cpf ou e-mail informado!"
       })
     }
     const contaNova = {
@@ -32,7 +32,7 @@ const criarConta = (req, res) => {
     }
     contas.push(contaNova)
     return res.status(201).send()
-  } catch {
+  } catch (erro) {
     return res.status(500).json({ mensagem: 'erro inesperado' })
   }
 }
@@ -57,7 +57,7 @@ const atualizarDadosUsuario = (req, res) => {
     })
     if (cpfJaExiste) {
       return res.status(404).json({
-        "mensagem": "O CPF informado já existe cadastrado!"
+        mensagem: "O CPF informado já existe cadastrado!"
       })
     }
     const emailJaExiste = contas.find((conta) => {
@@ -65,7 +65,7 @@ const atualizarDadosUsuario = (req, res) => {
     })
     if (emailJaExiste) {
       return res.status(404).json({
-        "mensagem": "O email informado já existe cadastrado!"
+        mensagem: "O email informado já existe cadastrado!"
       })
     }
     contaEncontrada.nome = nome
@@ -74,9 +74,9 @@ const atualizarDadosUsuario = (req, res) => {
     contaEncontrada.telefone = telefone
     contaEncontrada.email = email
     contaEncontrada.senha = senha
-    return res.status(200).send()
+    return res.status(204)
 
-  } catch {
+  } catch (erro) {
     return res.status(500).json({ mensagem: 'erro inesperado' })
   }
 }
@@ -95,21 +95,57 @@ const excluirConta = (req, res) => {
     }
     if (contaEncontrada.saldo !== 0) {
       return res.status(404).json({
-        "mensagem": "A conta só pode ser removida se o saldo for zero!"
+        mensagem: "A conta só pode ser removida se o saldo for zero!"
       })
     }
     contas = contas.filter((conta) => {
       return conta.numero !== Number(numeroConta)
     })
-    return res.status(200).send()
-  } catch {
+    return res.status(204)
+  } catch (erro) {
     return res.status(500).json({ mensagem: 'erro inesperado' })
   }
 }
+
+const depositar = (req, res) => {
+  const {numero_conta, valor} = req.body
+  try {
+    if (!numero_conta || !valor) {
+      return res.status(404).json({
+        mensagem: "O número da conta e o valor são obrigatórios!"
+      })
+    }
+    if (Number(valor) <= 0) {
+      return res.status(400).json({mensagem: 'O valor a ser depositado não pode ser negativo!'})
+    }
+    const contaEncontrada = contas.find((conta) => {
+      return conta.numero === Number(numero_conta)
+    })
+    if (!contaEncontrada) {
+      return res.status(400).json({mensagem: 'Não foi encontrada conta com o número informado.'})
+    }
+
+    contaEncontrada.saldo += Number(valor)
+
+    depositos.push({
+      data: new Date(),
+      numero_conta,
+      valor
+    })
+
+    return res.status(204).json()
+    
+  } catch (error) {
+    return res.status(500).json({ mensagem: 'erro inesperado' })
+  }
+}
+
+
 
 module.exports = {
   listarContas,
   criarConta,
   atualizarDadosUsuario,
-  excluirConta
+  excluirConta,
+  depositar
 }

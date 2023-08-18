@@ -11,4 +11,6 @@ rotas.put('/contas/:numeroConta', controladorBanco.atualizarDadosUsuario)
 
 rotas.delete('/contas/:numeroConta', controladorBanco.excluirConta)
 
+rotas.post('/transacoes/depositar', controladorBanco.depositar)
+
 module.exports = rotas
