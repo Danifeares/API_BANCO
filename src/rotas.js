@@ -13,4 +13,6 @@ rotas.delete('/contas/:numeroConta', controladorBanco.excluirConta)
 
 rotas.post('/transacoes/depositar', controladorBanco.depositar)
 
+rotas.post('/transacoes/sacar', controladorBanco.sacar)
+
 module.exports = rotas

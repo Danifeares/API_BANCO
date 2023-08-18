@@ -1,4 +1,4 @@
-let { contas, idConta, depositos } = require('../bancodedados')
+let { contas, idConta, depositos, saques } = require('../bancodedados')
 
 const listarContas = (req, res) => {
   res.status(200).json(contas)
@@ -140,6 +140,42 @@ const depositar = (req, res) => {
   }
 }
 
+const sacar = (req, res) => {
+  const {numero_conta, valor, senha} = req.body
+  try {
+    if (!numero_conta || !valor || !senha) {
+      return res.status(404).json({
+        mensagem: "O número da conta, o valor e a senha são obrigatórios!"
+      })
+    }
+    const contaEncontrada = contas.find((conta) => {
+      return conta.numero === Number(numero_conta)
+    })
+    if (!contaEncontrada) {
+      return res.status(400).json({mensagem: 'Não foi encontrada conta com o número informado.'})
+    }
+    if (senha !== contaEncontrada.senha) {
+      return res.status(401).json({mensagem: 'A senha informada é inválida.'})
+    }
+    if (Number(valor) > contaEncontrada.saldo) {
+      return res.status(400).json({mensagem: 'Saldo indisponível para saque.'})
+    }
+
+    contaEncontrada.saldo -= Number(valor)
+
+    saques.push({
+      data: new Date(),
+      numero_conta,
+      valor
+    })
+
+    return res.status(204).json()
+    
+  } catch (error) {
+    return res.status(500).json({ mensagem: 'erro inesperado' })
+  }
+}
+
 
 
 module.exports = {
@@ -147,5 +183,6 @@ module.exports = {
   criarConta,
   atualizarDadosUsuario,
   excluirConta,
-  depositar
+  depositar,
+  sacar
 }
