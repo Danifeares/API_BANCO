@@ -245,6 +245,54 @@ const saldo = (req, res) => {
   }
 }
 
+const extrato = (req, res) => {
+  const { numero_conta, senha } = req.query
+  try {
+    if (!numero_conta || !senha) {
+      return res.status(404).json({
+        mensagem: "O número da conta e a senha são obrigatórios!"
+      })
+    }
+    const contaEncontrada = contas.find((conta) => {
+      return conta.numero === Number(numero_conta)
+    })
+    if (!contaEncontrada) {
+      return res.status(400).json({ mensagem: 'Não foi encontrada conta com o número informado.' })
+    }
+    if (senha !== contaEncontrada.usuario.senha) {
+      return res.status(401).json({ mensagem: 'A senha informada é inválida.' })
+    }
+ 
+    const depositosConta = depositos.filter((deposito) => {
+      return deposito.numero_conta === numero_conta
+    })
+
+    const saquesConta = saques.filter((saque) => {
+      return saque.numero_conta === numero_conta
+    })
+    
+    const transferenciasEnviadas = transferencias.filter((enviado) => {
+      return enviado.numero_conta_origem === numero_conta
+    })
+    
+    const transfenciasRecebidas = transferencias.filter((recebido) => {
+      return recebido.numero_conta_destino === numero_conta
+    })
+    
+    const extrato = {
+      depositos: depositosConta,
+      saques: saquesConta,
+      transferenciasEnviadas,
+      transfenciasRecebidas
+    } 
+
+    res.status(200).json(extrato)
+    
+  }catch (erro) {
+    return res.status(500).json({ mensagem: 'erro inesperado' })
+  }
+}
+
 
 module.exports = {
   listarContas,
@@ -254,5 +302,6 @@ module.exports = {
   depositar,
   sacar,
   transferir,
-  saldo
+  saldo,
+  extrato
 }

@@ -19,4 +19,6 @@ rotas.post('/transacoes/transferir', controladorBanco.transferir)
 
 rotas.get('/contas/saldo', controladorBanco.saldo)
 
+rotas.get('/contas/extrato', controladorBanco.extrato)
+
 module.exports = rotas
