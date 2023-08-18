@@ -1,4 +1,5 @@
 let { contas, idConta, depositos, saques } = require('../bancodedados')
+const {format} = require('date-fns')
 
 const listarContas = (req, res) => {
   res.status(200).json(contas)
@@ -12,7 +13,7 @@ const criarConta = (req, res) => {
     }
 
     const contaJaExiste = contas.find((conta) => {
-      return conta.cpf === cpf || conta.email === email
+      return conta.usuario.cpf === cpf || conta.usuario.email === email
     })
 
     if (contaJaExiste) {
@@ -23,12 +24,14 @@ const criarConta = (req, res) => {
     const contaNova = {
       numero: idConta++,
       saldo: 0,
-      nome,
-      cpf,
-      data_nascimento,
-      telefone,
-      email,
-      senha
+      usuario: {
+        nome,
+        cpf,
+        data_nascimento,
+        telefone,
+        email,
+        senha
+      }
     }
     contas.push(contaNova)
     return res.status(201).send()
@@ -53,7 +56,7 @@ const atualizarDadosUsuario = (req, res) => {
       })
     }
     const cpfJaExiste = contas.find((conta) => {
-      return conta.cpf === cpf
+      return conta.usuario.cpf === cpf
     })
     if (cpfJaExiste) {
       return res.status(404).json({
@@ -61,20 +64,20 @@ const atualizarDadosUsuario = (req, res) => {
       })
     }
     const emailJaExiste = contas.find((conta) => {
-      return conta.email === email
+      return conta.usuario.email === email
     })
     if (emailJaExiste) {
       return res.status(404).json({
         mensagem: "O email informado já existe cadastrado!"
       })
     }
-    contaEncontrada.nome = nome
-    contaEncontrada.cpf = cpf
-    contaEncontrada.data_nascimento = data_nascimento
-    contaEncontrada.telefone = telefone
-    contaEncontrada.email = email
-    contaEncontrada.senha = senha
-    return res.status(204)
+    contaEncontrada.usuario.nome = nome
+    contaEncontrada.usuario.cpf = cpf
+    contaEncontrada.usuario.data_nascimento = data_nascimento
+    contaEncontrada.usuario.telefone = telefone
+    contaEncontrada.usuario.email = email
+    contaEncontrada.usuario.senha = senha
+    return res.status(204).json()
 
   } catch (erro) {
     return res.status(500).json({ mensagem: 'erro inesperado' })
@@ -101,14 +104,14 @@ const excluirConta = (req, res) => {
     contas = contas.filter((conta) => {
       return conta.numero !== Number(numeroConta)
     })
-    return res.status(204)
+    return res.status(204).json()
   } catch (erro) {
     return res.status(500).json({ mensagem: 'erro inesperado' })
   }
 }
 
 const depositar = (req, res) => {
-  const {numero_conta, valor} = req.body
+  const { numero_conta, valor } = req.body
   try {
     if (!numero_conta || !valor) {
       return res.status(404).json({
@@ -116,32 +119,32 @@ const depositar = (req, res) => {
       })
     }
     if (Number(valor) <= 0) {
-      return res.status(400).json({mensagem: 'O valor a ser depositado não pode ser negativo!'})
+      return res.status(400).json({ mensagem: 'O valor a ser depositado não pode ser negativo!' })
     }
     const contaEncontrada = contas.find((conta) => {
       return conta.numero === Number(numero_conta)
     })
     if (!contaEncontrada) {
-      return res.status(400).json({mensagem: 'Não foi encontrada conta com o número informado.'})
+      return res.status(400).json({ mensagem: 'Não foi encontrada conta com o número informado.' })
     }
 
     contaEncontrada.saldo += Number(valor)
 
     depositos.push({
-      data: new Date(),
+      data: format(new Date(), "yyyy'-'MM'-'dd HH':'mm':'ss"),
       numero_conta,
       valor
     })
 
     return res.status(204).json()
-    
+
   } catch (error) {
     return res.status(500).json({ mensagem: 'erro inesperado' })
   }
 }
 
 const sacar = (req, res) => {
-  const {numero_conta, valor, senha} = req.body
+  const { numero_conta, valor, senha } = req.body
   try {
     if (!numero_conta || !valor || !senha) {
       return res.status(404).json({
@@ -152,25 +155,25 @@ const sacar = (req, res) => {
       return conta.numero === Number(numero_conta)
     })
     if (!contaEncontrada) {
-      return res.status(400).json({mensagem: 'Não foi encontrada conta com o número informado.'})
+      return res.status(400).json({ mensagem: 'Não foi encontrada conta com o número informado.' })
     }
-    if (senha !== contaEncontrada.senha) {
-      return res.status(401).json({mensagem: 'A senha informada é inválida.'})
+    if (senha !== contaEncontrada.usuario.senha) {
+      return res.status(401).json({ mensagem: 'A senha informada é inválida.' })
     }
     if (Number(valor) > contaEncontrada.saldo) {
-      return res.status(400).json({mensagem: 'Saldo indisponível para saque.'})
+      return res.status(400).json({ mensagem: 'Saldo indisponível para saque.' })
     }
 
     contaEncontrada.saldo -= Number(valor)
 
     saques.push({
-      data: new Date(),
+      data: format(new Date(), "yyyy'-'MM'-'dd HH':'mm':'ss"),
       numero_conta,
       valor
     })
 
     return res.status(204).json()
-    
+
   } catch (error) {
     return res.status(500).json({ mensagem: 'erro inesperado' })
   }
