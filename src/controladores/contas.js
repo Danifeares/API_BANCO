@@ -1,5 +1,6 @@
 let { contas, idConta, depositos, saques, transferencias } = require('../bancodedados')
 const { format } = require('date-fns')
+const {verificadoraDeID} = require('./funcoesValidadoras')
 
 const listarContas = (req, res) => {
   res.status(200).json(contas)
@@ -12,15 +13,6 @@ const criarConta = (req, res) => {
       return res.status(400).json({ mensagem: "Os dados inseridos estão incompletos." })
     }
 
-    const contaJaExiste = contas.find((conta) => {
-      return conta.usuario.cpf === cpf || conta.usuario.email === email
-    })
-
-    if (contaJaExiste) {
-      return res.status(404).json({
-        mensagem: "Já existe uma conta com o cpf ou e-mail informado!"
-      })
-    }
     const contaNova = {
       numero: idConta++,
       saldo: 0,
@@ -34,7 +26,9 @@ const criarConta = (req, res) => {
       }
     }
     contas.push(contaNova)
+
     return res.status(201).send()
+    
   } catch (erro) {
     return res.status(500).json({ mensagem: 'erro inesperado' })
   }
@@ -47,30 +41,9 @@ const atualizarDadosUsuario = (req, res) => {
     if (!nome || !cpf || !data_nascimento || !telefone || !email || !senha) {
       return res.status(400).json({ mensagem: "Os dados inseridos estão incompletos." })
     }
-    const contaEncontrada = contas.find((conta) => {
-      return conta.numero === Number(numeroConta)
-    })
-    if (!contaEncontrada) {
-      return res.status(400).json({
-        mensagem: 'O número da conta informado é inválido'
-      })
-    }
-    const cpfJaExiste = contas.find((conta) => {
-      return conta.usuario.cpf === cpf
-    })
-    if (cpfJaExiste) {
-      return res.status(404).json({
-        mensagem: "O CPF informado já existe cadastrado!"
-      })
-    }
-    const emailJaExiste = contas.find((conta) => {
-      return conta.usuario.email === email
-    })
-    if (emailJaExiste) {
-      return res.status(404).json({
-        mensagem: "O email informado já existe cadastrado!"
-      })
-    }
+   
+    let contaEncontrada = verificadoraDeID(req, res, numeroConta)
+
     contaEncontrada.usuario.nome = nome
     contaEncontrada.usuario.cpf = cpf
     contaEncontrada.usuario.data_nascimento = data_nascimento
@@ -84,27 +57,24 @@ const atualizarDadosUsuario = (req, res) => {
   }
 }
 
-
+// verificar: após a conta ja ser excluida, ele segue localizando ela e retornando 204
 const excluirConta = (req, res) => {
   const { numeroConta } = req.params
   try {
-    const contaEncontrada = contas.find((conta) => {
-      return conta.numero === Number(numeroConta)
-    })
-    if (!contaEncontrada) {
-      return res.status(400).json({
-        mensagem: 'O número da conta informado é inválido'
-      })
-    }
+  
+    let contaEncontrada = verificadoraDeID(req, res, numeroConta)
+
     if (contaEncontrada.saldo !== 0) {
       return res.status(404).json({
         mensagem: "A conta só pode ser removida se o saldo for zero!"
       })
     }
     contas = contas.filter((conta) => {
-      return conta.numero !== Number(numeroConta)
+      return conta.numero !== Number(contaEncontrada.numero)
     })
+    
     return res.status(204).json()
+
   } catch (erro) {
     return res.status(500).json({ mensagem: 'erro inesperado' })
   }
@@ -121,12 +91,7 @@ const depositar = (req, res) => {
     if (Number(valor) <= 0) {
       return res.status(400).json({ mensagem: 'O valor a ser depositado não pode ser negativo!' })
     }
-    const contaEncontrada = contas.find((conta) => {
-      return conta.numero === Number(numero_conta)
-    })
-    if (!contaEncontrada) {
-      return res.status(400).json({ mensagem: 'Não foi encontrada conta com o número informado.' })
-    }
+    let contaEncontrada = verificadoraDeID(req, res, numero_conta)
 
     contaEncontrada.saldo += Number(valor)
 
@@ -151,12 +116,9 @@ const sacar = (req, res) => {
         mensagem: "O número da conta, o valor e a senha são obrigatórios!"
       })
     }
-    const contaEncontrada = contas.find((conta) => {
-      return conta.numero === Number(numero_conta)
-    })
-    if (!contaEncontrada) {
-      return res.status(400).json({ mensagem: 'Não foi encontrada conta com o número informado.' })
-    }
+
+    let contaEncontrada = verificadoraDeID(req, res, numero_conta)
+
     if (senha !== contaEncontrada.usuario.senha) {
       return res.status(401).json({ mensagem: 'A senha informada é inválida.' })
     }
@@ -187,15 +149,11 @@ const transferir = (req, res) => {
         mensagem: "Os números das contas, o valor da transferência e a senha do banco de origem são obrigatórios!"
       })
     }
-    const contaDeOrigemEncontrada = contas.find((conta) => {
-      return conta.numero === Number(numero_conta_origem)
-    })
-    const contaDeDestinoEncontrada = contas.find((conta) => {
-      return conta.numero === Number(numero_conta_destino)
-    })
-    if (!contaDeOrigemEncontrada || !contaDeDestinoEncontrada) {
-      return res.status(400).json({ mensagem: 'Não foi possível encontrar conta(s) com o(s) número(s) informado(s).' })
-    }
+
+    let contaDeOrigemEncontrada = verificadoraDeID(req, res, numero_conta_origem)
+    
+    let contaDeDestinoEncontrada = verificadoraDeID(req, res, numero_conta_destino)
+
     if (senha !== contaDeOrigemEncontrada.usuario.senha) {
       return res.status(401).json({ mensagem: 'A senha informada é inválida.' })
     }
@@ -228,12 +186,9 @@ const saldo = (req, res) => {
         mensagem: "O número da conta e a senha são obrigatórios!"
       })
     }
-    const contaEncontrada = contas.find((conta) => {
-      return conta.numero === Number(numero_conta)
-    })
-    if (!contaEncontrada) {
-      return res.status(400).json({ mensagem: 'Não foi encontrada conta com o número informado.' })
-    }
+
+    let contaEncontrada = verificadoraDeID(req, res, numero_conta)
+
     if (senha !== contaEncontrada.usuario.senha) {
       return res.status(401).json({ mensagem: 'A senha informada é inválida.' })
     }
@@ -253,12 +208,9 @@ const extrato = (req, res) => {
         mensagem: "O número da conta e a senha são obrigatórios!"
       })
     }
-    const contaEncontrada = contas.find((conta) => {
-      return conta.numero === Number(numero_conta)
-    })
-    if (!contaEncontrada) {
-      return res.status(400).json({ mensagem: 'Não foi encontrada conta com o número informado.' })
-    }
+
+    let contaEncontrada = verificadoraDeID(req, res, numero_conta)
+    
     if (senha !== contaEncontrada.usuario.senha) {
       return res.status(401).json({ mensagem: 'A senha informada é inválida.' })
     }
