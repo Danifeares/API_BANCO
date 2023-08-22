@@ -1,9 +1,10 @@
-let { contas, idConta, depositos, saques, transferencias } = require('../bancodedados')
+let bancoDeDados = require('../bancodedados')
 const { format } = require('date-fns')
 const { verificadoraDeID } = require('./funcoesValidadoras')
+let { idConta, depositos, saques, transferencias } = bancoDeDados
 
 const listarContas = (req, res) => {
-  res.status(200).json(contas)
+  res.status(200).json(bancoDeDados.contas)
 }
 
 const criarConta = (req, res) => {
@@ -25,7 +26,7 @@ const criarConta = (req, res) => {
         senha
       }
     }
-    contas.push(contaNova)
+    bancoDeDados.contas.push(contaNova)
 
     return res.status(201).send()
 
@@ -68,7 +69,7 @@ const excluirConta = (req, res) => {
         mensagem: "A conta só pode ser removida se o saldo for zero!"
       })
     }
-    contas = contas.filter((conta) => {
+    bancoDeDados.contas = bancoDeDados.contas.filter((conta) => {
       return conta.numero !== Number(contaEncontrada.numero)
     })
 

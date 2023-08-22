@@ -1,7 +1,7 @@
-let { contas } = require('../bancodedados')
+let bancoDeDados= require('../bancodedados')
 
 function localizarID(id) {
-  return contas.find((conta) => {
+  return bancoDeDados.contas.find((conta) => {
     return conta.numero === Number(id)
   })
 
@@ -17,13 +17,13 @@ function verificadoraDeID(req, res, id) {
 }
 
 function localizarCPF(cpf) {
-  return contas.find((conta) => {
+  return bancoDeDados.contas.find((conta) => {
     return conta.usuario.cpf === cpf
   })
 }
 
 function localizarEmail(email) {
-  return contas.find((conta) => {
+  return bancoDeDados.contas.find((conta) => {
     return conta.usuario.email === email
   })
 }
