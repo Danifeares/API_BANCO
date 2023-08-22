@@ -1,21 +1,21 @@
-const {localizarCPF, localizarEmail} = require('./controladores/funcoesValidadoras')
+const { localizarCPF, localizarEmail } = require('./controladores/funcoesValidadoras')
 const validarSenha = (req, res, next) => {
-  const {senha_banco} = req.query
+  const { senha_banco } = req.query
   if (!senha_banco) {
     return res.status(400).json({
-        "mensagem": "A senha do banco não foi informada."
+      "mensagem": "A senha do banco não foi informada."
     })
   }
   if (senha_banco !== 'Cubos123Bank') {
     return res.status(401).json({
       "mensagem": "A senha do banco informada é inválida!"
-  })
+    })
   }
   next()
 }
 
 const validarEmailOuCPF = (req, res, next) => {
-  const {cpf, email} = req.body
+  const { cpf, email } = req.body
 
   const cpfJaExiste = localizarCPF(cpf)
   const emailJaExiste = localizarEmail(email)
@@ -38,4 +38,4 @@ const validarEmailOuCPF = (req, res, next) => {
   next()
 }
 
-module.exports = {validarSenha, validarEmailOuCPF}
+module.exports = { validarSenha, validarEmailOuCPF }

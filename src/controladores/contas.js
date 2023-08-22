@@ -1,6 +1,6 @@
 let { contas, idConta, depositos, saques, transferencias } = require('../bancodedados')
 const { format } = require('date-fns')
-const {verificadoraDeID} = require('./funcoesValidadoras')
+const { verificadoraDeID } = require('./funcoesValidadoras')
 
 const listarContas = (req, res) => {
   res.status(200).json(contas)
@@ -28,7 +28,7 @@ const criarConta = (req, res) => {
     contas.push(contaNova)
 
     return res.status(201).send()
-    
+
   } catch (erro) {
     return res.status(500).json({ mensagem: 'erro inesperado' })
   }
@@ -41,7 +41,7 @@ const atualizarDadosUsuario = (req, res) => {
     if (!nome || !cpf || !data_nascimento || !telefone || !email || !senha) {
       return res.status(400).json({ mensagem: "Os dados inseridos estão incompletos." })
     }
-   
+
     let contaEncontrada = verificadoraDeID(req, res, numeroConta)
 
     contaEncontrada.usuario.nome = nome
@@ -60,7 +60,7 @@ const atualizarDadosUsuario = (req, res) => {
 const excluirConta = (req, res) => {
   const { numeroConta } = req.params
   try {
-  
+
     let contaEncontrada = verificadoraDeID(req, res, numeroConta)
 
     if (contaEncontrada.saldo !== 0) {
@@ -71,7 +71,7 @@ const excluirConta = (req, res) => {
     contas = contas.filter((conta) => {
       return conta.numero !== Number(contaEncontrada.numero)
     })
-    
+
     return res.status(204).json()
 
   } catch (erro) {
@@ -150,7 +150,7 @@ const transferir = (req, res) => {
     }
 
     let contaDeOrigemEncontrada = verificadoraDeID(req, res, numero_conta_origem)
-    
+
     let contaDeDestinoEncontrada = verificadoraDeID(req, res, numero_conta_destino)
 
     if (senha !== contaDeOrigemEncontrada.usuario.senha) {
@@ -174,7 +174,7 @@ const transferir = (req, res) => {
 
   } catch (erro) {
     return res.status(500).json({ mensagem: 'erro inesperado' })
-  } 
+  }
 }
 
 const saldo = (req, res) => {
@@ -192,9 +192,9 @@ const saldo = (req, res) => {
       return res.status(401).json({ mensagem: 'A senha informada é inválida.' })
     }
 
-    res.status(200).json({saldo: contaEncontrada.saldo})
+    res.status(200).json({ saldo: contaEncontrada.saldo })
 
-  }catch (erro) {
+  } catch (erro) {
     return res.status(500).json({ mensagem: 'erro inesperado' })
   }
 }
@@ -209,11 +209,11 @@ const extrato = (req, res) => {
     }
 
     let contaEncontrada = verificadoraDeID(req, res, numero_conta)
-    
+
     if (senha !== contaEncontrada.usuario.senha) {
       return res.status(401).json({ mensagem: 'A senha informada é inválida.' })
     }
- 
+
     const depositosConta = depositos.filter((deposito) => {
       return deposito.numero_conta === numero_conta
     })
@@ -221,25 +221,25 @@ const extrato = (req, res) => {
     const saquesConta = saques.filter((saque) => {
       return saque.numero_conta === numero_conta
     })
-    
+
     const transferenciasEnviadas = transferencias.filter((enviado) => {
       return enviado.numero_conta_origem === numero_conta
     })
-    
+
     const transfenciasRecebidas = transferencias.filter((recebido) => {
       return recebido.numero_conta_destino === numero_conta
     })
-    
+
     const extrato = {
       depositos: depositosConta,
       saques: saquesConta,
       transferenciasEnviadas,
       transfenciasRecebidas
-    } 
+    }
 
     res.status(200).json(extrato)
-    
-  }catch (erro) {
+
+  } catch (erro) {
     return res.status(500).json({ mensagem: 'erro inesperado' })
   }
 }

@@ -1,6 +1,6 @@
 const express = require('express')
 const controladorBanco = require('./controladores/contas')
-const {validarSenha, validarEmailOuCPF} = require("./intermediarios")
+const { validarSenha, validarEmailOuCPF } = require("./intermediarios")
 const rotas = express()
 
 rotas.get('/contas', validarSenha, controladorBanco.listarContas)

@@ -1,12 +1,12 @@
 let { contas } = require('../bancodedados')
 
-function localizarID (id) {
+function localizarID(id) {
   return contas.find((conta) => {
     return conta.numero === Number(id)
   })
 
 }
-function verificadoraDeID (req, res, id) {
+function verificadoraDeID(req, res, id) {
   const idLocalizado = localizarID(id)
   if (!idLocalizado) {
     return res.status(400).json({
@@ -16,13 +16,13 @@ function verificadoraDeID (req, res, id) {
   return idLocalizado
 }
 
-function localizarCPF (cpf) {
+function localizarCPF(cpf) {
   return contas.find((conta) => {
     return conta.usuario.cpf === cpf
   })
-} 
+}
 
-function localizarEmail (email) {
+function localizarEmail(email) {
   return contas.find((conta) => {
     return conta.usuario.email === email
   })
