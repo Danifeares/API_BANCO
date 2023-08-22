@@ -4,17 +4,36 @@
 
 ## Descrição do desafio
 
-O desafio consiste na criação de um banco digital. A aplicação realiza as seguintes funções:
+O desafio consiste na criação de um banco digital, utilizando conceitos de API REST.
 
--   Criar conta bancária
--   Listar contas bancárias
--   Atualizar os dados do usuário da conta bancária
--   Excluir uma conta bancária
--   Depósitar em uma conta bancária
--   Sacar de uma conta bancária
--   Transferir valores entre contas bancárias
--   Consultar saldo da conta bancária
--   Emitir extrato bancário
+## A aplicação realiza as seguintes funções:
+
+-   Criar conta bancária:
+
+
+-   Listar contas bancárias:
+
+    <img src="/assets/rotaGET.gif">
+
+-   Atualizar os dados do usuário da conta bancária:
+
+
+-   Excluir uma conta bancária:
+
+
+-   Depósitar em uma conta bancária:
+
+
+-   Sacar de uma conta bancária:
+
+
+-   Transferir valores entre contas bancárias:
+
+
+-   Consultar saldo da conta bancária:
+
+
+-   Emitir extrato bancário:
 
 
 
