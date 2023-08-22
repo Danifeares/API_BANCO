@@ -57,7 +57,6 @@ const atualizarDadosUsuario = (req, res) => {
   }
 }
 
-// verificar: após a conta ja ser excluida, ele segue localizando ela e retornando 204
 const excluirConta = (req, res) => {
   const { numeroConta } = req.params
   try {
@@ -175,7 +174,7 @@ const transferir = (req, res) => {
 
   } catch (erro) {
     return res.status(500).json({ mensagem: 'erro inesperado' })
-  }
+  } 
 }
 
 const saldo = (req, res) => {
