@@ -9,14 +9,13 @@ O desafio consiste na criação de um banco digital, utilizando conceitos de API
 ## A aplicação realiza as seguintes funções:
 
 -   Criar conta bancária:
-
+    <img src="/assets/rotaPOST.gif">
 
 -   Listar contas bancárias:
-
     <img src="/assets/rotaGET.gif">
 
 -   Atualizar os dados do usuário da conta bancária:
-
+    <img src="/assets/rotaPUT.gif">
 
 -   Excluir uma conta bancária:
 
