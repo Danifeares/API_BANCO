@@ -157,7 +157,7 @@ const transferir = (req, res) => {
       return res.status(401).json({ mensagem: 'A senha informada é inválida.' })
     }
     if (Number(valor) > contaDeOrigemEncontrada.saldo) {
-      return res.status(400).json({ mensagem: 'Saldo indisponível para saque.' })
+      return res.status(400).json({ mensagem: 'Saldo indisponível em conta.' })
     }
 
     contaDeOrigemEncontrada.saldo -= Number(valor)
