@@ -1,17 +1,19 @@
 const express = require('express')
 const controladorBanco = require('./controladores/contas')
-const { validarSenha,
+const { validarSenhaBanco,
   validarEmailOuCPF,
   validarSenhaDaContaBODY,
   validarSenhaDaContaQUERY,
   validarIDParams,
   validarIDBody,
-  validarIDQuery
+  validarIDQuery,
+  validarIDContasOrigemEDestino,
+  validarSenhaDaContaOrigem
 } = require("./intermediarios")
 
 const rotas = express()
 
-rotas.get('/contas', validarSenha, controladorBanco.listarContas)
+rotas.get('/contas', validarSenhaBanco, controladorBanco.listarContas)
 
 rotas.post('/contas', validarEmailOuCPF, controladorBanco.criarConta)
 
@@ -23,7 +25,7 @@ rotas.post('/transacoes/depositar', validarIDBody, controladorBanco.depositar)
 
 rotas.post('/transacoes/sacar', validarIDBody, validarSenhaDaContaBODY, controladorBanco.sacar)
 
-rotas.post('/transacoes/transferir', controladorBanco.transferir)
+rotas.post('/transacoes/transferir', validarIDContasOrigemEDestino, validarSenhaDaContaOrigem, controladorBanco.transferir)
 
 rotas.get('/contas/saldo', validarIDQuery, validarSenhaDaContaQUERY, controladorBanco.saldo)
 

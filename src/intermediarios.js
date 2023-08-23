@@ -1,5 +1,5 @@
-const { localizarCPF, localizarEmail, verificadoraDeID, localizarID } = require('./controladores/funcoesValidadoras')
-const validarSenha = (req, res, next) => {
+const { localizarCPF, localizarEmail, localizarID } = require('./controladores/funcoesLocalizadoras')
+const validarSenhaBanco = (req, res, next) => {
   const { senha_banco } = req.query
   if (!senha_banco) {
     return res.status(400).json({
@@ -31,6 +31,29 @@ const validarIDBody = (req, res, next) => {
   if (!idLocalizado) {
     return res.status(400).json({
       mensagem: 'O número da conta informado é inválido'
+    })
+  }
+  next()
+}
+
+const validarIDContasOrigemEDestino = (req, res, next) => {
+  const { numero_conta_origem, numero_conta_destino } = req.body
+  const idLocalizadoORIGEM = localizarID(numero_conta_origem)
+  const idLocalizadoDESTINO = localizarID(numero_conta_destino)
+
+  if (!idLocalizadoORIGEM && !idLocalizadoDESTINO) {
+    return res.status(400).json({
+      mensagem: 'As contas informadas não foram localizadas.'
+    })
+  }
+  if (!idLocalizadoORIGEM) {
+    return res.status(400).json({
+      mensagem: 'O número da conta de origem informado é inválido.'
+    })
+  }
+  if (!idLocalizadoDESTINO) {
+    return res.status(400).json({
+      mensagem: 'O número da conta de destino informado é inválido.'
     })
   }
   next()
@@ -89,13 +112,24 @@ const validarSenhaDaContaQUERY = (req, res, next) => {
   next()
 }
 
+const validarSenhaDaContaOrigem = (req, res, next) => {
+  const { senha, numero_conta_origem } = req.body
+  const contaExiste = localizarID(numero_conta_origem)
+  if (senha !== contaExiste.usuario.senha) {
+    return res.status(401).json({ mensagem: 'A senha informada é inválida.' })
+  }
+  next()
+}
+
 
 module.exports = {
-  validarSenha,
+  validarSenhaBanco,
   validarEmailOuCPF,
   validarSenhaDaContaBODY,
   validarSenhaDaContaQUERY,
   validarIDParams,
   validarIDBody,
-  validarIDQuery
+  validarIDQuery,
+  validarIDContasOrigemEDestino,
+  validarSenhaDaContaOrigem
 }

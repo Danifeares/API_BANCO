@@ -6,15 +6,6 @@ function localizarID(id) {
   })
 
 }
-function verificadoraDeID(req, res, id) {
-  const idLocalizado = localizarID(id)
-  if (!idLocalizado) {
-    return res.status(400).json({
-      mensagem: 'O número da conta informado é inválido'
-    })
-  }
-  return idLocalizado
-}
 
 function localizarCPF(cpf) {
   return bancoDeDados.contas.find((conta) => {
@@ -29,7 +20,6 @@ function localizarEmail(email) {
 }
 
 module.exports = {
-  verificadoraDeID,
   localizarCPF,
   localizarEmail,
   localizarID

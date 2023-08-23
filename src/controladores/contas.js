@@ -1,6 +1,6 @@
 let bancoDeDados = require('../bancodedados')
 const { format } = require('date-fns')
-const { verificadoraDeID, localizarID } = require('./funcoesValidadoras')
+const { localizarID } = require('./funcoesLocalizadoras')
 let { idConta, depositos, saques, transferencias } = bancoDeDados
 
 const listarContas = (req, res) => {
@@ -147,13 +147,10 @@ const transferir = (req, res) => {
       })
     }
 
-    let contaDeOrigemEncontrada = verificadoraDeID(req, res, numero_conta_origem)
+    let contaDeOrigemEncontrada = localizarID(numero_conta_origem)
 
-    let contaDeDestinoEncontrada = verificadoraDeID(req, res, numero_conta_destino)
+    let contaDeDestinoEncontrada = localizarID(numero_conta_destino)
 
-    if (senha !== contaDeOrigemEncontrada.usuario.senha) {
-      return res.status(401).json({ mensagem: 'A senha informada é inválida.' })
-    }
     if (Number(valor) > contaDeOrigemEncontrada.saldo) {
       return res.status(400).json({ mensagem: 'Saldo indisponível em conta.' })
     }
