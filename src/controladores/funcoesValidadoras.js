@@ -1,4 +1,4 @@
-let bancoDeDados= require('../bancodedados')
+let bancoDeDados = require('../bancodedados')
 
 function localizarID(id) {
   return bancoDeDados.contas.find((conta) => {
@@ -31,5 +31,6 @@ function localizarEmail(email) {
 module.exports = {
   verificadoraDeID,
   localizarCPF,
-  localizarEmail
+  localizarEmail,
+  localizarID
 }

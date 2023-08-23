@@ -1,6 +1,6 @@
 let bancoDeDados = require('../bancodedados')
 const { format } = require('date-fns')
-const { verificadoraDeID } = require('./funcoesValidadoras')
+const { verificadoraDeID, localizarID } = require('./funcoesValidadoras')
 let { idConta, depositos, saques, transferencias } = bancoDeDados
 
 const listarContas = (req, res) => {
@@ -43,7 +43,7 @@ const atualizarDadosUsuario = (req, res) => {
       return res.status(400).json({ mensagem: "Os dados inseridos estão incompletos." })
     }
 
-    let contaEncontrada = verificadoraDeID(req, res, numeroConta)
+    let contaEncontrada = localizarID(numeroConta)
 
     contaEncontrada.usuario.nome = nome
     contaEncontrada.usuario.cpf = cpf
@@ -62,7 +62,7 @@ const excluirConta = (req, res) => {
   const { numeroConta } = req.params
   try {
 
-    let contaEncontrada = verificadoraDeID(req, res, numeroConta)
+    let contaEncontrada = localizarID(numeroConta)
 
     if (contaEncontrada.saldo !== 0) {
       return res.status(404).json({
@@ -91,7 +91,7 @@ const depositar = (req, res) => {
     if (Number(valor) <= 0) {
       return res.status(400).json({ mensagem: 'O valor a ser depositado não pode ser negativo!' })
     }
-    let contaEncontrada = verificadoraDeID(req, res, numero_conta)
+    let contaEncontrada = localizarID(numero_conta)
 
     contaEncontrada.saldo += Number(valor)
 
@@ -117,11 +117,8 @@ const sacar = (req, res) => {
       })
     }
 
-    let contaEncontrada = verificadoraDeID(req, res, numero_conta)
+    let contaEncontrada = localizarID(numero_conta)
 
-    if (senha !== contaEncontrada.usuario.senha) {
-      return res.status(401).json({ mensagem: 'A senha informada é inválida.' })
-    }
     if (Number(valor) > contaEncontrada.saldo) {
       return res.status(400).json({ mensagem: 'Saldo indisponível para saque.' })
     }
@@ -187,11 +184,7 @@ const saldo = (req, res) => {
       })
     }
 
-    let contaEncontrada = verificadoraDeID(req, res, numero_conta)
-
-    if (senha !== contaEncontrada.usuario.senha) {
-      return res.status(401).json({ mensagem: 'A senha informada é inválida.' })
-    }
+    let contaEncontrada = localizarID(numero_conta)
 
     res.status(200).json({ saldo: contaEncontrada.saldo })
 
@@ -207,12 +200,6 @@ const extrato = (req, res) => {
       return res.status(404).json({
         mensagem: "O número da conta e a senha são obrigatórios!"
       })
-    }
-
-    let contaEncontrada = verificadoraDeID(req, res, numero_conta)
-
-    if (senha !== contaEncontrada.usuario.senha) {
-      return res.status(401).json({ mensagem: 'A senha informada é inválida.' })
     }
 
     const depositosConta = depositos.filter((deposito) => {

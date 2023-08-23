@@ -1,4 +1,4 @@
-const { localizarCPF, localizarEmail } = require('./controladores/funcoesValidadoras')
+const { localizarCPF, localizarEmail, verificadoraDeID, localizarID } = require('./controladores/funcoesValidadoras')
 const validarSenha = (req, res, next) => {
   const { senha_banco } = req.query
   if (!senha_banco) {
@@ -9,6 +9,39 @@ const validarSenha = (req, res, next) => {
   if (senha_banco !== 'Cubos123Bank') {
     return res.status(401).json({
       "mensagem": "A senha do banco informada é inválida!"
+    })
+  }
+  next()
+}
+
+const validarIDParams = (req, res, next) => {
+  const { numeroConta } = req.params
+  const idLocalizado = localizarID(numeroConta)
+  if (!idLocalizado) {
+    return res.status(400).json({
+      mensagem: 'O número da conta informado é inválido'
+    })
+  }
+  next()
+}
+
+const validarIDBody = (req, res, next) => {
+  const { numero_conta } = req.body
+  const idLocalizado = localizarID(numero_conta)
+  if (!idLocalizado) {
+    return res.status(400).json({
+      mensagem: 'O número da conta informado é inválido'
+    })
+  }
+  next()
+}
+
+const validarIDQuery = (req, res, next) => {
+  const { numero_conta } = req.query
+  const idLocalizado = localizarID(numero_conta)
+  if (!idLocalizado) {
+    return res.status(400).json({
+      mensagem: 'O número da conta informado é inválido'
     })
   }
   next()
@@ -38,4 +71,31 @@ const validarEmailOuCPF = (req, res, next) => {
   next()
 }
 
-module.exports = { validarSenha, validarEmailOuCPF }
+const validarSenhaDaContaBODY = (req, res, next) => {
+  const { senha, numero_conta } = req.body
+  const contaExiste = localizarID(numero_conta)
+  if (senha !== contaExiste.usuario.senha) {
+    return res.status(401).json({ mensagem: 'A senha informada é inválida.' })
+  }
+  next()
+}
+
+const validarSenhaDaContaQUERY = (req, res, next) => {
+  const { senha, numero_conta } = req.query
+  const contaExiste = localizarID(numero_conta)
+  if (senha !== contaExiste.usuario.senha) {
+    return res.status(401).json({ mensagem: 'A senha informada é inválida.' })
+  }
+  next()
+}
+
+
+module.exports = {
+  validarSenha,
+  validarEmailOuCPF,
+  validarSenhaDaContaBODY,
+  validarSenhaDaContaQUERY,
+  validarIDParams,
+  validarIDBody,
+  validarIDQuery
+}
